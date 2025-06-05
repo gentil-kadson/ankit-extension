@@ -6,7 +6,10 @@
     "default_popup": "index.html"
   },
   "permissions": ["scripting"],
-  "host_permissions": ["http://*/*", "https://*/*"],
+  "host_permissions": [
+    "http://localhost:3000/study-session/*",
+    "http://localhost:3000/"
+  ],
   "icons": {
     "32": "32ankit.png"
   }
