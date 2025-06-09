@@ -1,15 +1,13 @@
 {
   "manifest_version": 3,
   "version": "1.0.0",
-  "name": "Ankit",
+  "name": "Ankit Extension",
+  "description": "Communicates with Ankit website to add cards from user's study sessions to Anki.",
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["scripting"],
-  "host_permissions": [
-    "http://localhost:3000/study-session/*",
-    "http://localhost:3000/"
-  ],
+  "permissions": ["activeTab, scripting"],
+  "host_permissions": ["http://localhost:3000/*"],
   "icons": {
     "32": "32ankit.png"
   }

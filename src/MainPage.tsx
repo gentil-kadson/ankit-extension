@@ -2,7 +2,7 @@ import PlayingCards from "/public/playing_cards.svg";
 
 export default function MainPage() {
   return (
-    <main className="text-stone-400">
+    <main className="text-stone-400 border-none">
       <h1 className="font-bold">Ankit</h1>
       <p className="text-[1.2rem]">
         Termine uma sessão de estudos ou clique em{" "}
