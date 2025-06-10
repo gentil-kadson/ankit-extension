@@ -6,9 +6,18 @@
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["activeTab, scripting"],
+  "permissions": ["activeTab", "scripting"],
   "host_permissions": ["http://localhost:3000/*"],
   "icons": {
     "32": "32ankit.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:3000/*"],
+      "js": ["contentScript.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
   }
 }
