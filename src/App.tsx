@@ -18,6 +18,7 @@ function App() {
   useEffect(() => {
     console.log(flashcards);
   }, [flashcards]);
+
   return <>{flashcards.length === 0 ? <MainPage /> : <FormPage />}</>;
 }
 
