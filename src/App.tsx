@@ -1,33 +1,22 @@
-import type { Flashcard } from "./types";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import MainPage from "./components/MainPage";
 import FormPage from "./components/FormPage";
+import { useContext } from "react";
+import FlashcardsContext from "./context/FlashcardsContext";
 
 function App() {
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-
-  const handleFlashcardsReset = () => {
-    setFlashcards([]);
-  };
+  const { flashcards, addFlashcards } = useContext(FlashcardsContext);
 
   useEffect(() => {
     chrome.runtime.sendMessage(
       { type: "REQUEST_FLASHCARDS_FROM_BACKGROUND" },
       (response) => {
-        if (response && response.flashcards) setFlashcards(response.flashcards);
+        if (response && response.flashcards) addFlashcards(response.flashcards);
       }
     );
   }, []);
 
-  return (
-    <>
-      {flashcards.length === 0 ? (
-        <MainPage />
-      ) : (
-        <FormPage onAdditionCancelled={handleFlashcardsReset} />
-      )}
-    </>
-  );
+  return <>{flashcards.length === 0 ? <MainPage /> : <FormPage />}</>;
 }
 
 export default App;

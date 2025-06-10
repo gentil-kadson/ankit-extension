@@ -1,18 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import signalDisconnectedIcon from "/public/signal_disconnected.svg";
 import Button from "./Button";
 import FormSection from "./FormSection";
+import FlashcardsContext from "../context/FlashcardsContext";
 
 type ConnectionStatus = {
   status: "loading" | "error" | "success";
   decks: string[];
 };
 
-type FormPageProps = {
-  onAdditionCancelled: () => void;
-};
+export default function FormPage() {
+  const { resetFlashcards } = useContext(FlashcardsContext);
 
-export default function FormPage({ onAdditionCancelled }: FormPageProps) {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
     status: "loading",
     decks: [],
@@ -20,7 +19,7 @@ export default function FormPage({ onAdditionCancelled }: FormPageProps) {
 
   const handleCancelAdditionToDeck = () => {
     setConnectionStatus({ decks: [], status: "loading" });
-    onAdditionCancelled();
+    resetFlashcards();
   };
 
   useEffect(() => {
