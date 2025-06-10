@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import Button from "./Button";
 
 type FormSection = {
@@ -10,8 +9,6 @@ export default function FormSection({
   decks,
   onAdditionCancelation,
 }: FormSection) {
-  useEffect(() => {}, []);
-
   return (
     <section className="w-full flex flex-col gap-4">
       <div className="flex flex-col gap-2">
