@@ -1,10 +1,27 @@
 import { useEffect, useState } from "react";
 import signalDisconnectedIcon from "/public/signal_disconnected.svg";
+import Button from "./Button";
+import FormSection from "./FormSection";
 
-export default function FormPage() {
-  const [connectionStatus, setConnectionStatus] = useState<
-    "loading" | "error" | "success"
-  >("error");
+type ConnectionStatus = {
+  status: "loading" | "error" | "success";
+  decks: string[];
+};
+
+type FormPageProps = {
+  onAdditionCancelled: () => void;
+};
+
+export default function FormPage({ onAdditionCancelled }: FormPageProps) {
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
+    status: "loading",
+    decks: [],
+  });
+
+  const handleCancelAdditionToDeck = () => {
+    setConnectionStatus({ decks: [], status: "loading" });
+    onAdditionCancelled();
+  };
 
   useEffect(() => {
     const fetchDecksPayload = {
@@ -20,17 +37,26 @@ export default function FormPage() {
       body: JSON.stringify(fetchDecksPayload),
     })
       .then((response) => response.json())
-      .then((_json) => {
-        setConnectionStatus("success");
+      .then((json) => {
+        setConnectionStatus((prevStatus) => ({
+          ...prevStatus,
+          status: "success",
+          decks: json.result,
+        }));
       })
-      .catch((_error) => setConnectionStatus("error"));
+      .catch((_error) =>
+        setConnectionStatus((prevStatus) => ({
+          ...prevStatus,
+          status: "error",
+        }))
+      );
   }, [connectionStatus]);
 
   return (
     <main className="border-white h-screen justify-center items-center gap-3">
-      {connectionStatus !== "success" && (
+      {connectionStatus.status !== "success" && (
         <>
-          {connectionStatus === "error" ? (
+          {connectionStatus.status === "error" ? (
             <>
               <div className="flex flex-col items-center">
                 <img
@@ -45,12 +71,16 @@ export default function FormPage() {
                   Verifique se o add-on "AnkiConnect" foi adicionado ao seu Anki
                   ou se o Anki está aberto.
                 </p>
-                <button
-                  onClick={() => setConnectionStatus("loading")}
-                  className="rounded-md py-2 px-3 flex justify-center items-center bg-blue-700 hover:bg-blue-800 cursor-pointer"
+                <Button
+                  onClick={() =>
+                    setConnectionStatus((prevStatus) => ({
+                      ...prevStatus,
+                      status: "loading",
+                    }))
+                  }
                 >
                   Tentar novamente
-                </button>
+                </Button>
               </div>
             </>
           ) : (
@@ -58,7 +88,12 @@ export default function FormPage() {
           )}
         </>
       )}
-      {connectionStatus === "success" && <h1>FORMULÁRIO AQUI!!!</h1>}
+      {connectionStatus.status === "success" && (
+        <FormSection
+          onAdditionCancelation={handleCancelAdditionToDeck}
+          decks={connectionStatus.decks}
+        />
+      )}
     </main>
   );
 }

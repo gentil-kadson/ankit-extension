@@ -6,6 +6,10 @@ import FormPage from "./components/FormPage";
 function App() {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
 
+  const handleFlashcardsReset = () => {
+    setFlashcards([]);
+  };
+
   useEffect(() => {
     chrome.runtime.sendMessage(
       { type: "REQUEST_FLASHCARDS_FROM_BACKGROUND" },
@@ -15,11 +19,15 @@ function App() {
     );
   }, []);
 
-  useEffect(() => {
-    console.log(flashcards);
-  }, [flashcards]);
-
-  return <>{flashcards.length === 0 ? <MainPage /> : <FormPage />}</>;
+  return (
+    <>
+      {flashcards.length === 0 ? (
+        <MainPage />
+      ) : (
+        <FormPage onAdditionCancelled={handleFlashcardsReset} />
+      )}
+    </>
+  );
 }
 
 export default App;
