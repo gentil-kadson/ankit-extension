@@ -51,7 +51,6 @@ export const addFlashcardsAudio = async (flashcards: Flashcard[]) => {
     }
     return flashcardsWithAudio;
   } catch (error) {
-    console.log("ERRO AQUIIIII AAAAAA:", error);
     throw new Error(
       "Não foi possível gerar o áudio dos cards. Tente novamente mais tarde"
     );

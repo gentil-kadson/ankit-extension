@@ -5,10 +5,6 @@ let storedFlashcards: Flashcard[] = [];
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "FLASHCARDS_DATA") {
     storedFlashcards = message.payload;
-    console.log(
-      "Flashcards received and store in background script: ",
-      storedFlashcards
-    );
 
     sendResponse({ status: "Flashcards received on the background" });
   }

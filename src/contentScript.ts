@@ -7,7 +7,6 @@ window.addEventListener("message", (event: MessageEvent) => {
     event.data.flashcards
   ) {
     const flashcards: Flashcard[] = event.data.flashcards;
-    console.log("received flashcards in content script:", flashcards);
 
     chrome.runtime.sendMessage({
       type: "FLASHCARDS_DATA",
