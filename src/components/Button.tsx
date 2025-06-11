@@ -14,7 +14,9 @@ export default function Button({ styleType = "primary", ...props }: Button) {
   return (
     <button
       {...props}
-      className={`rounded-md py-2 px-3 flex justify-center items-center ${styleTypes[styleType]} cursor-pointer`}
+      className={`rounded-md py-2 px-3 flex justify-center items-center ${
+        styleTypes[styleType]
+      } ${props.disabled ? "brightness-50" : undefined} cursor-pointer`}
     ></button>
   );
 }
