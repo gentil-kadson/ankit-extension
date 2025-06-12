@@ -45,6 +45,7 @@ export default function FormSection({
               ...prevState,
               type: "success",
               show: true,
+              content: "Cartões adicionados. Já pode começar a estudar :)",
             }))
           )
           .catch((_error) =>
