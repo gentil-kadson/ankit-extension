@@ -29,7 +29,7 @@ export default function FormSection({
             "Content-Type": "application/json",
           },
           body: JSON.stringify(flashcardPayload),
-        });
+        }).catch((_error) => setError("Conexão com o Anki perdida"));
       }
       setIsLoading(false);
     } catch (error: any) {
@@ -41,7 +41,7 @@ export default function FormSection({
   return (
     <section className="w-full flex flex-col gap-4">
       {error && (
-        <p className="bg-red-600 font-bold text-white self-center p-2">
+        <p className="bg-red-600 font-bold text-white self-center w-full text-center rounded-sm p-2">
           {error}
         </p>
       )}

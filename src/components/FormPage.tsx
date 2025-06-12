@@ -22,7 +22,9 @@ export default function FormPage() {
     resetFlashcards();
   };
 
-  useEffect(() => {
+  const handleGetDeckNames = () => {
+    setConnectionStatus((prevStatus) => ({ ...prevStatus, status: "loading" }));
+
     const fetchDecksPayload = {
       action: "deckNames",
       version: 6,
@@ -49,7 +51,11 @@ export default function FormPage() {
           status: "error",
         }))
       );
-  }, [connectionStatus]);
+  };
+
+  useEffect(() => {
+    handleGetDeckNames();
+  }, []);
 
   return (
     <main className="border-white h-screen justify-center items-center gap-3">
@@ -70,16 +76,7 @@ export default function FormPage() {
                   Verifique se o add-on "AnkiConnect" foi adicionado ao seu Anki
                   ou se o Anki está aberto.
                 </p>
-                <Button
-                  onClick={() =>
-                    setConnectionStatus((prevStatus) => ({
-                      ...prevStatus,
-                      status: "loading",
-                    }))
-                  }
-                >
-                  Tentar novamente
-                </Button>
+                <Button onClick={handleGetDeckNames}>Tentar novamente</Button>
               </div>
             </>
           ) : (
