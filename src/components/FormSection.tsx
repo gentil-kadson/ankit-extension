@@ -8,6 +8,12 @@ type FormSection = {
   onAdditionCancelation: () => void;
 };
 
+type Message = {
+  type: "success" | "error";
+  content: string;
+  show: boolean;
+};
+
 export default function FormSection({
   decks,
   onAdditionCancelation,
@@ -15,10 +21,14 @@ export default function FormSection({
   const { flashcards } = useContext(FlashcardsContext);
   const selectRef = useRef<HTMLSelectElement>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<Message>({
+    type: "success",
+    show: false,
+    content: "",
+  });
 
   const handleCardsSubmit = async () => {
-    setError(null);
+    setMessage((prevMessage) => ({ ...prevMessage, show: false }));
     setIsLoading(true);
     try {
       const flashcardsPayload = await addFlashcardsAudio(flashcards);
@@ -29,20 +39,49 @@ export default function FormSection({
             "Content-Type": "application/json",
           },
           body: JSON.stringify(flashcardPayload),
-        }).catch((_error) => setError("Conexão com o Anki perdida"));
+        })
+          .then((_response) =>
+            setMessage((prevState) => ({
+              ...prevState,
+              type: "success",
+              show: true,
+            }))
+          )
+          .catch((_error) =>
+            setMessage((prevMessage) => ({
+              ...prevMessage,
+              type: "error",
+              show: true,
+            }))
+          );
       }
+      setTimeout(() => {
+        setMessage((prevMessage) => ({ ...prevMessage, show: false }));
+      }, 5000);
       setIsLoading(false);
     } catch (error: any) {
-      setError(error.message);
+      setMessage((prevMessage) => ({
+        ...prevMessage,
+        show: true,
+        content:
+          "Não foi possível gerar os áudios dos seus cartões. Por favor, tente novamente",
+      }));
+      setTimeout(() => {
+        setMessage((prevMessage) => ({ ...prevMessage, show: false }));
+      }, 5000);
       setIsLoading(false);
     }
   };
 
   return (
     <section className="w-full flex flex-col gap-4">
-      {error && (
-        <p className="bg-red-600 font-bold text-white self-center w-full text-center rounded-sm p-2">
-          {error}
+      {message.show && (
+        <p
+          className={`${
+            message.type === "success" ? "bg-green-600" : "bg-red-600"
+          } font-bold text-white self-center w-full text-center rounded-sm p-2`}
+        >
+          {message.content}
         </p>
       )}
       <div className="flex flex-col gap-2">
