@@ -1,2 +1,5 @@
-// import type { Flashcard } from "../types";
-// import openAi from "../apis/openAi";
+export const waitThenRemoveMessage = (func: any) => {
+  setTimeout(() => {
+    func();
+  }, 5000);
+};

@@ -2,6 +2,7 @@ import { useContext, useRef, useState } from "react";
 import Button from "./Button";
 import FlashcardsContext from "../context/FlashcardsContext";
 import AnkiConnectService from "../classes/AnkiConnectService";
+import { waitThenRemoveMessage } from "../utils/functions";
 
 type FormSection = {
   decks: string[];
@@ -31,47 +32,30 @@ export default function FormSection({
   const handleCardsSubmit = async () => {
     setMessage((prevMessage) => ({ ...prevMessage, show: false }));
     setIsLoading(true);
+
     try {
-      const flashcardsPayload =
-        await ankiConnectService.getFlashcardsWithAudioPayloads(flashcards);
-      for (const flashcardPayload of flashcardsPayload) {
-        await fetch("http://localhost:8765", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(flashcardPayload),
-        })
-          .then((_response) =>
-            setMessage((prevState) => ({
-              ...prevState,
-              type: "success",
-              show: true,
-              content: "Cartões adicionados. Já pode começar a estudar :)",
-            }))
-          )
-          .catch((_error) =>
-            setMessage((prevMessage) => ({
-              ...prevMessage,
-              type: "error",
-              show: true,
-            }))
-          );
-      }
-      setTimeout(() => {
-        setMessage((prevMessage) => ({ ...prevMessage, show: false }));
-      }, 5000);
+      await ankiConnectService.addCardsToAnki(flashcards);
+      setMessage((prevState) => ({
+        ...prevState,
+        type: "success",
+        show: true,
+        content: "Cartões adicionados. Já pode começar a estudar :)",
+      }));
+      waitThenRemoveMessage(() =>
+        setMessage((prevMessage) => ({ ...prevMessage, show: false }))
+      );
       setIsLoading(false);
     } catch (error: any) {
       setMessage((prevMessage) => ({
         ...prevMessage,
+        type: "error",
         show: true,
-        content:
-          "Não foi possível gerar os áudios dos seus cartões. Por favor, tente novamente",
+        content: error.message,
       }));
-      setTimeout(() => {
-        setMessage((prevMessage) => ({ ...prevMessage, show: false }));
-      }, 5000);
+
+      waitThenRemoveMessage(() =>
+        setMessage((prevMessage) => ({ ...prevMessage, show: false }))
+      );
       setIsLoading(false);
     }
   };

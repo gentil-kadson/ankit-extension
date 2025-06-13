@@ -93,9 +93,33 @@ export default class AnkiConnectService {
       const flashcardsPayload = await Promise.all(flashcardsAudioPromises);
       return flashcardsPayload;
     } catch (error) {
+      console.log("ENTREI NESSA PORRA DE ÁUDIO ERRADO");
       throw new Error(
         "Não foi possível gerar o áudio dos cards. Tente novamente mais tarde"
       );
+    }
+  }
+
+  async addCardsToAnki(flashcards: Flashcard[]) {
+    const addCardsToAnkiPromises: Promise<Response>[] = [];
+    const flashcardsPayload = await this.getFlashcardsWithAudioPayloads(
+      flashcards
+    );
+
+    for (const flashcardPayload of flashcardsPayload) {
+      addCardsToAnkiPromises.push(
+        fetch("http://localhost:8765", {
+          ...this.baseFetchData,
+          body: JSON.stringify(flashcardPayload),
+        })
+      );
+    }
+
+    try {
+      await Promise.all(addCardsToAnkiPromises);
+    } catch (error) {
+      console.log("ENTREI NESSA PORRA DE CONEXÃO PERDIDA");
+      throw Error("Conexão com o Anki perdida");
     }
   }
 }
