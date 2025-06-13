@@ -1,7 +1,7 @@
 import { useContext, useRef, useState } from "react";
 import Button from "./Button";
 import FlashcardsContext from "../context/FlashcardsContext";
-import { addFlashcardsAudio } from "../utils/functions";
+import AnkiConnectService from "../classes/AnkiConnectService";
 
 type FormSection = {
   decks: string[];
@@ -26,12 +26,14 @@ export default function FormSection({
     show: false,
     content: "",
   });
+  const ankiConnectService = new AnkiConnectService();
 
   const handleCardsSubmit = async () => {
     setMessage((prevMessage) => ({ ...prevMessage, show: false }));
     setIsLoading(true);
     try {
-      const flashcardsPayload = await addFlashcardsAudio(flashcards);
+      const flashcardsPayload =
+        await ankiConnectService.getFlashcardsWithAudioPayloads(flashcards);
       for (const flashcardPayload of flashcardsPayload) {
         await fetch("http://localhost:8765", {
           method: "POST",

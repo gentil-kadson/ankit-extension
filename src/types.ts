@@ -6,7 +6,7 @@ export type Flashcard = {
 export type FlashcardAudioPayload = {
   filename: string;
   data: string;
-  fields: ["Front"];
+  fields: string[];
 };
 
 export type FlashcardPayload = {
