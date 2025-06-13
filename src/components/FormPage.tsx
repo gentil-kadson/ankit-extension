@@ -50,7 +50,7 @@ export default function FormPage() {
   }, []);
 
   return (
-    <main className="border-white h-screen justify-center items-center gap-3">
+    <main className="justify-center items-center gap-3">
       {connectionStatus.status !== "success" && (
         <>
           {connectionStatus.status === "error" ? (

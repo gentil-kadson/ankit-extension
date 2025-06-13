@@ -7,7 +7,7 @@ interface Button extends ButtonHTMLAttributes<HTMLButtonElement> {
 export default function Button({ styleType = "primary", ...props }: Button) {
   const styleTypes = {
     primary: "bg-blue-700",
-    secondary: "bg-stone-800 border-2 border-blue-700",
+    secondary: "bg-stone-800",
     danger: "bg-red-600",
   };
 
@@ -18,7 +18,7 @@ export default function Button({ styleType = "primary", ...props }: Button) {
         styleTypes[styleType]
       } ${
         props.disabled ? "brightness-50" : undefined
-      } cursor-pointer hover:brightness-90`}
+      } cursor-pointer hover:brightness-90 border-2 border-blue-700`}
     ></button>
   );
 }

@@ -3,7 +3,7 @@ import AnkitIcon from "/public/ankit_icon.svg";
 
 export default function MainPage() {
   return (
-    <main className="text-stone-400 border-none">
+    <main className="text-stone-400">
       <div className="flex items-center justify-center gap-1">
         <img
           className="w-[35px] h-[35px]"
