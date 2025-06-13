@@ -93,7 +93,6 @@ export default class AnkiConnectService {
       const flashcardsPayload = await Promise.all(flashcardsAudioPromises);
       return flashcardsPayload;
     } catch (error) {
-      console.log("ENTREI NESSA PORRA DE ÁUDIO ERRADO");
       throw new Error(
         "Não foi possível gerar o áudio dos cards. Tente novamente mais tarde"
       );
@@ -118,7 +117,6 @@ export default class AnkiConnectService {
     try {
       await Promise.all(addCardsToAnkiPromises);
     } catch (error) {
-      console.log("ENTREI NESSA PORRA DE CONEXÃO PERDIDA");
       throw Error("Conexão com o Anki perdida");
     }
   }
