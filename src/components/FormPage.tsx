@@ -3,6 +3,7 @@ import signalDisconnectedIcon from "/public/signal_disconnected.svg";
 import Button from "./Button";
 import FormSection from "./FormSection";
 import FlashcardsContext from "../context/FlashcardsContext";
+import AnkiConnectService from "../classes/AnkiConnectService";
 
 type ConnectionStatus = {
   status: "loading" | "error" | "success";
@@ -16,6 +17,7 @@ export default function FormPage() {
     status: "loading",
     decks: [],
   });
+  const ankiConnectService = new AnkiConnectService();
 
   const handleCancelAdditionToDeck = () => {
     setConnectionStatus({ decks: [], status: "loading" });
@@ -25,18 +27,8 @@ export default function FormPage() {
   const handleGetDeckNames = () => {
     setConnectionStatus((prevStatus) => ({ ...prevStatus, status: "loading" }));
 
-    const fetchDecksPayload = {
-      action: "deckNames",
-      version: 6,
-    };
-
-    fetch("http://localhost:8765", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(fetchDecksPayload),
-    })
+    ankiConnectService
+      .getDeckNames()
       .then((response) => response.json())
       .then((json) => {
         setConnectionStatus((prevStatus) => ({

@@ -21,7 +21,6 @@ export const addFlashcardsAudio = async (flashcards: Flashcard[]) => {
 
   try {
     for (const flashcard of flashcards) {
-      console.log("globbit");
       const createFlashcardAudio = async () => {
         const audiodata = await openAi.audio.speech.create({
           input: flashcard.front,
@@ -38,7 +37,7 @@ export const addFlashcardsAudio = async (flashcards: Flashcard[]) => {
               deckName: "Teste Ankit",
               modelName: "Basic-e3b45",
               fields: {
-                Front: flashcard.front + "\n",
+                Front: flashcard.front + "<br>",
                 Back: flashcard.back,
               },
               audio: [
