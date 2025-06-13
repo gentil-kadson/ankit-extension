@@ -95,7 +95,7 @@ export default function FormSection({
         </Button>
         <Button
           disabled={isLoading}
-          styleType="danger"
+          styleType="secondary"
           onClick={onAdditionCancelation}
         >
           Voltar

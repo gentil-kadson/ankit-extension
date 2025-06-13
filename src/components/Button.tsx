@@ -6,9 +6,9 @@ interface Button extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export default function Button({ styleType = "primary", ...props }: Button) {
   const styleTypes = {
-    primary: "bg-blue-700 hover:bg-blue-800",
-    secondary: "bg-stone-700 hover:bg-stone-800",
-    danger: "bg-red-600 hover:bg-red-700",
+    primary: "bg-blue-700",
+    secondary: "bg-stone-800 border-2 border-blue-700",
+    danger: "bg-red-600",
   };
 
   return (
@@ -16,7 +16,9 @@ export default function Button({ styleType = "primary", ...props }: Button) {
       {...props}
       className={`rounded-md py-2 px-3 flex justify-center items-center ${
         styleTypes[styleType]
-      } ${props.disabled ? "brightness-50" : undefined} cursor-pointer`}
+      } ${
+        props.disabled ? "brightness-50" : undefined
+      } cursor-pointer hover:brightness-90`}
     ></button>
   );
 }
