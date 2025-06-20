@@ -1,18 +1,21 @@
-import openAi from "../apis/openAi";
+// import openAi from "../apis/openAi";
 import type { Flashcard, FlashcardPayload } from "../types";
 
 export default class AnkiConnectService {
-  private baseUrl: string = "http://localhost:8765";
+  private ankiConnectBaseUrl: string = "http://localhost:8765";
+  private ankitTextToSpeechBaseUrl: string = import.meta.env
+    .VITE_ANKIT_TEXT_TO_SPEECH_API_BASE_URL;
   private baseFetchData = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
   };
-  private speechGenerationParams = {
-    model: "gpt-4o-mini-tts",
-    voice: "alloy",
-  };
+  private deckName: string = "";
+
+  setDeckName(deckName: string) {
+    this.deckName = deckName;
+  }
 
   async arrayBufferToBase64(arrayBuffer: ArrayBuffer): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -32,7 +35,7 @@ export default class AnkiConnectService {
       version: 6,
     };
 
-    return fetch(this.baseUrl, {
+    return fetch(this.ankiConnectBaseUrl, {
       ...this.baseFetchData,
       body: JSON.stringify(fetchDecksPayload),
     });
@@ -48,7 +51,7 @@ export default class AnkiConnectService {
       version: 6,
       params: {
         note: {
-          deckName: "Teste Ankit",
+          deckName: this.deckName,
           modelName: "Basic-e3b45",
           fields: {
             Front: front + "<br>",
@@ -67,11 +70,21 @@ export default class AnkiConnectService {
   }
 
   async getCompleteFlashcardPayload(front: string, back: string) {
-    const audiodata = await openAi.audio.speech.create({
-      ...this.speechGenerationParams,
-      input: front,
-    });
-    const arrayBuffer = await audiodata.arrayBuffer();
+    const audiodataResponse = await fetch(
+      `${this.ankitTextToSpeechBaseUrl}/speech`,
+      {
+        ...this.baseFetchData,
+        body: JSON.stringify({ input: front }),
+      }
+    );
+
+    if (audiodataResponse.status === 500) {
+      throw Error(
+        "Não foi possível gerar os áudios para os cartões. Tente novamente mais tarde."
+      );
+    }
+
+    const arrayBuffer = await audiodataResponse.arrayBuffer();
     const base64Audio = await this.arrayBufferToBase64(arrayBuffer);
 
     const flashcardPayload: FlashcardPayload =
@@ -83,20 +96,14 @@ export default class AnkiConnectService {
   async getFlashcardsWithAudioPayloads(flashcards: Flashcard[]) {
     const flashcardsAudioPromises: Promise<FlashcardPayload>[] = [];
 
-    try {
-      for (const flashcard of flashcards) {
-        flashcardsAudioPromises.push(
-          this.getCompleteFlashcardPayload(flashcard.front, flashcard.back)
-        );
-      }
-
-      const flashcardsPayload = await Promise.all(flashcardsAudioPromises);
-      return flashcardsPayload;
-    } catch (error) {
-      throw new Error(
-        "Não foi possível gerar o áudio dos cards. Tente novamente mais tarde"
+    for (const flashcard of flashcards) {
+      flashcardsAudioPromises.push(
+        this.getCompleteFlashcardPayload(flashcard.front, flashcard.back)
       );
     }
+
+    const flashcardsPayload = await Promise.all(flashcardsAudioPromises);
+    return flashcardsPayload;
   }
 
   async addCardsToAnki(flashcards: Flashcard[]) {

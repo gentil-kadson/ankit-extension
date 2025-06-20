@@ -34,6 +34,20 @@ export default function FormSection({
     setIsLoading(true);
 
     try {
+      if (!selectRef.current) {
+        waitThenRemoveMessage(() =>
+          setMessage((prevState) => ({
+            ...prevState,
+            type: "error",
+            show: true,
+            content: "Este baralho não existe",
+          }))
+        );
+
+        return;
+      }
+
+      ankiConnectService.setDeckName(selectRef.current.value);
       await ankiConnectService.addCardsToAnki(flashcards);
       setMessage((prevState) => ({
         ...prevState,
