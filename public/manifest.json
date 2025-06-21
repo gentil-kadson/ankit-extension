@@ -7,13 +7,16 @@
     "default_popup": "index.html"
   },
   "permissions": ["activeTab", "scripting"],
-  "host_permissions": ["http://localhost:3000/*", "http://localhost:4321/*"],
+  "host_permissions": [
+    "https://ankit-frontend.vercel.app/*",
+    "https://ankit-text-to-speech.vercel.app/*"
+  ],
   "icons": {
     "32": "32ankit.png"
   },
   "content_scripts": [
     {
-      "matches": ["http://localhost:3000/*"],
+      "matches": ["https://ankit-frontend.vercel.app/*"],
       "js": ["assets/content.js"]
     }
   ],
