@@ -73,7 +73,11 @@ export default class AnkiConnectService {
     const audiodataResponse = await fetch(
       `${this.ankitTextToSpeechBaseUrl}/speech`,
       {
-        ...this.baseFetchData,
+        method: this.baseFetchData.method,
+        headers: {
+          "Content-Type": this.baseFetchData.headers["Content-Type"],
+          "x-extension-secret": import.meta.env.EXTENSION_SECRET,
+        },
         body: JSON.stringify({ input: front }),
       }
     );
