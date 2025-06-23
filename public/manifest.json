@@ -13,7 +13,8 @@
   ],
   "icons": {
     "32": "ankit_icon32.png",
-    "48": "ankit_icon48.png"
+    "48": "ankit_icon48.png",
+    "128": "ankit_icon128.png"
   },
   "content_scripts": [
     {
