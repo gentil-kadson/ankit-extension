@@ -76,7 +76,7 @@ export default class AnkiConnectService {
         method: this.baseFetchData.method,
         headers: {
           "Content-Type": this.baseFetchData.headers["Content-Type"],
-          "x-extension-secret": import.meta.env.EXTENSION_SECRET,
+          "x-extension-secret": import.meta.env.VITE_EXTENSION_SECRET,
         },
         body: JSON.stringify({ input: front }),
       }
@@ -85,6 +85,11 @@ export default class AnkiConnectService {
     if (audiodataResponse.status === 500) {
       throw Error(
         "Não foi possível gerar os áudios para os cartões. Tente novamente mais tarde."
+      );
+    }
+    if (audiodataResponse.status === 403) {
+      throw Error(
+        "Sua extensão não tem permissão para gerar os áudios. Reinstale-a, por favor."
       );
     }
 
