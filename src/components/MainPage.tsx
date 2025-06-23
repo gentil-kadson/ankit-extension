@@ -19,7 +19,7 @@ export default function MainPage() {
           src={PlayingCards}
           alt="Cartões de baralho contornados de branco"
         />{" "}
-        em uma sessão de estudos finalizada para adicionar seus cartões no Anki!
+        em uma sessão de estudos finalizada para adicionar seus cartões ao Anki!
       </p>
     </main>
   );
