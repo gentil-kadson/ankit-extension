@@ -84,12 +84,12 @@ export default class AnkiConnectService {
 
     if (audiodataResponse.status === 500) {
       throw Error(
-        "Não foi possível gerar os áudios para os cartões. Tente novamente mais tarde."
+        "Não foi possível gerar os áudios para os cartões. Tente novamente mais tarde"
       );
     }
     if (audiodataResponse.status === 403) {
       throw Error(
-        "Sua extensão não tem permissão para gerar os áudios. Reinstale-a, por favor."
+        "Sua extensão não tem permissão para gerar os áudios. Por favor, reinstale-a"
       );
     }
 
