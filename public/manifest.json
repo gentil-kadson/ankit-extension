@@ -6,7 +6,6 @@
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["activeTab", "scripting"],
   "host_permissions": [
     "https://ankit-frontend.vercel.app/*",
     "https://ankit-text-to-speech.vercel.app/*"
