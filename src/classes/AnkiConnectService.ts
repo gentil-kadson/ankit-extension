@@ -1,8 +1,12 @@
-import type { Flashcard, FlashcardPayload } from "../types";
+import type {
+  Flashcard,
+  FlashcardPayload,
+  ModelRelatedResponse,
+} from "../types";
 import AnkitTextToSpeechService from "./AnkitTextToSpeechService";
 
 export default class AnkiConnectService {
-  private ankiConnectBaseUrl: string = "http://localhost:8765";
+  private baseUrl: string = "http://localhost:8765";
   private baseFetchData = {
     method: "POST",
     headers: {
@@ -11,6 +15,8 @@ export default class AnkiConnectService {
   };
   private deckName: string = "";
   private ankitTextToSpeechService = new AnkitTextToSpeechService();
+  private modelName: string = "";
+  private modelFields: string[] = [];
 
   setDeckName(deckName: string) {
     this.deckName = deckName;
@@ -22,10 +28,51 @@ export default class AnkiConnectService {
       version: 6,
     };
 
-    return fetch(this.ankiConnectBaseUrl, {
+    return fetch(this.baseUrl, {
       ...this.baseFetchData,
       body: JSON.stringify(fetchDecksPayload),
     });
+  }
+
+  async getBasicModelFields(modelName: string) {
+    const payload = {
+      action: "modelFieldNames",
+      version: 6,
+      params: {
+        modelName: modelName,
+      },
+    };
+
+    const response = await fetch(this.baseUrl, {
+      ...this.baseFetchData,
+      body: JSON.stringify(payload),
+    }).catch((_error) => {
+      throw Error("Conexão com o Anki perdida.");
+    });
+
+    const modelFields: ModelRelatedResponse = await response.json();
+    if (!modelFields.result || modelFields.result.length !== 2) {
+      throw Error(
+        "Modelo de cartão inválido. Certifique-se de ter o modelo de cartão básico no seu Anki"
+      );
+    }
+    this.modelName = modelName;
+    this.modelFields = modelFields.result;
+  }
+
+  async fillModelData() {
+    const response = await fetch(this.baseUrl, {
+      ...this.baseFetchData,
+      body: JSON.stringify({ action: "modelNames", version: 6 }),
+    }).catch((_error) => {
+      throw Error("Conexão com o Anki perdida");
+    });
+
+    const noteModels: ModelRelatedResponse = await response.json();
+    if (!noteModels.result) {
+      throw Error("Parece que não há modelos de cartões no seu Anki");
+    }
+    await this.getBasicModelFields(noteModels.result[0]);
   }
 
   async generateFlashcardPayload(front: string, back: string) {
@@ -38,16 +85,16 @@ export default class AnkiConnectService {
       params: {
         note: {
           deckName: this.deckName,
-          modelName: "Basic",
+          modelName: this.modelName,
           fields: {
-            Frente: front + "<br><br>",
-            Verso: back,
+            [this.modelFields[0]]: front + "<br><br>",
+            [this.modelFields[1]]: back,
           },
           audio: [
             {
               filename: `${front}.mp3`,
               data: base64Audio,
-              fields: ["Front"],
+              fields: [this.modelFields[0]],
             },
           ],
         },
@@ -72,11 +119,12 @@ export default class AnkiConnectService {
   async addCardsToAnki(flashcards: Flashcard[]) {
     try {
       const addCardsToAnkiPromises: Promise<Response>[] = [];
+      await this.fillModelData();
       const flashcardsPayload = await this.getFlashcardsPayloads(flashcards);
 
       for (const flashcardPayload of flashcardsPayload) {
         addCardsToAnkiPromises.push(
-          fetch(this.ankiConnectBaseUrl, {
+          fetch(this.baseUrl, {
             ...this.baseFetchData,
             body: JSON.stringify(flashcardPayload),
           })

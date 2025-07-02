@@ -17,15 +17,14 @@ export type FlashcardPayload = {
       deckName: string;
       modelName: string;
       fields: {
-        Frente: string;
-        Verso: string;
+        [key: string]: string;
       };
       audio: FlashcardAudioPayload[];
     };
   };
 };
 
-export type ModelTypeResponse = {
+export type ModelRelatedResponse = {
   result: string[] | null;
   error: string | null;
 };
