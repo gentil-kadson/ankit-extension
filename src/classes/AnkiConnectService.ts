@@ -1,10 +1,8 @@
-// import openAi from "../apis/openAi";
 import type { Flashcard, FlashcardPayload } from "../types";
+import AnkitTextToSpeechService from "./AnkitTextToSpeechService";
 
 export default class AnkiConnectService {
   private ankiConnectBaseUrl: string = "http://localhost:8765";
-  private ankitTextToSpeechBaseUrl: string = import.meta.env
-    .VITE_ANKIT_TEXT_TO_SPEECH_API_BASE_URL;
   private baseFetchData = {
     method: "POST",
     headers: {
@@ -12,21 +10,10 @@ export default class AnkiConnectService {
     },
   };
   private deckName: string = "";
+  private ankitTextToSpeechService = new AnkitTextToSpeechService();
 
   setDeckName(deckName: string) {
     this.deckName = deckName;
-  }
-
-  async arrayBufferToBase64(arrayBuffer: ArrayBuffer): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = (reader.result as string).split(",")[1];
-        resolve(base64String);
-      };
-      reader.onerror = (error) => reject(error);
-      reader.readAsDataURL(new Blob([arrayBuffer]));
-    });
   }
 
   getDeckNames() {
@@ -41,21 +28,20 @@ export default class AnkiConnectService {
     });
   }
 
-  generateFlashcardWithAudioPayload(
-    front: string,
-    back: string,
-    base64Audio: string
-  ): FlashcardPayload {
-    return {
+  async generateFlashcardPayload(front: string, back: string) {
+    const base64Audio = await this.ankitTextToSpeechService.generateBase64Audio(
+      front
+    );
+    const flashcardPayload: FlashcardPayload = {
       action: "addNote",
       version: 6,
       params: {
         note: {
           deckName: this.deckName,
-          modelName: "Basic-e3b45",
+          modelName: "Basic",
           fields: {
-            Front: front + "<br>",
-            Back: back,
+            Frente: front + "<br><br>",
+            Verso: back,
           },
           audio: [
             {
@@ -67,47 +53,15 @@ export default class AnkiConnectService {
         },
       },
     };
-  }
-
-  async getCompleteFlashcardPayload(front: string, back: string) {
-    const audiodataResponse = await fetch(
-      `${this.ankitTextToSpeechBaseUrl}/speech`,
-      {
-        method: this.baseFetchData.method,
-        headers: {
-          "Content-Type": this.baseFetchData.headers["Content-Type"],
-          "x-extension-secret": import.meta.env.VITE_EXTENSION_SECRET,
-        },
-        body: JSON.stringify({ input: front }),
-      }
-    );
-
-    if (audiodataResponse.status === 500) {
-      throw Error(
-        "Não foi possível gerar os áudios para os cartões. Tente novamente mais tarde"
-      );
-    }
-    if (audiodataResponse.status === 403) {
-      throw Error(
-        "Sua extensão não tem permissão para gerar os áudios. Por favor, reinstale-a"
-      );
-    }
-
-    const arrayBuffer = await audiodataResponse.arrayBuffer();
-    const base64Audio = await this.arrayBufferToBase64(arrayBuffer);
-
-    const flashcardPayload: FlashcardPayload =
-      this.generateFlashcardWithAudioPayload(front, back, base64Audio);
-
     return flashcardPayload;
   }
 
-  async getFlashcardsWithAudioPayloads(flashcards: Flashcard[]) {
+  async getFlashcardsPayloads(flashcards: Flashcard[]) {
     const flashcardsAudioPromises: Promise<FlashcardPayload>[] = [];
 
     for (const flashcard of flashcards) {
       flashcardsAudioPromises.push(
-        this.getCompleteFlashcardPayload(flashcard.front, flashcard.back)
+        this.generateFlashcardPayload(flashcard.front, flashcard.back)
       );
     }
 
@@ -116,24 +70,22 @@ export default class AnkiConnectService {
   }
 
   async addCardsToAnki(flashcards: Flashcard[]) {
-    const addCardsToAnkiPromises: Promise<Response>[] = [];
-    const flashcardsPayload = await this.getFlashcardsWithAudioPayloads(
-      flashcards
-    );
-
-    for (const flashcardPayload of flashcardsPayload) {
-      addCardsToAnkiPromises.push(
-        fetch("http://localhost:8765", {
-          ...this.baseFetchData,
-          body: JSON.stringify(flashcardPayload),
-        })
-      );
-    }
-
     try {
+      const addCardsToAnkiPromises: Promise<Response>[] = [];
+      const flashcardsPayload = await this.getFlashcardsPayloads(flashcards);
+
+      for (const flashcardPayload of flashcardsPayload) {
+        addCardsToAnkiPromises.push(
+          fetch(this.ankiConnectBaseUrl, {
+            ...this.baseFetchData,
+            body: JSON.stringify(flashcardPayload),
+          })
+        );
+      }
+
       await Promise.all(addCardsToAnkiPromises);
-    } catch (error) {
-      throw Error("Conexão com o Anki perdida");
+    } catch (error: any) {
+      throw Error(error.message);
     }
   }
 }

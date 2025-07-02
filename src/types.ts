@@ -15,12 +15,17 @@ export type FlashcardPayload = {
   params: {
     note: {
       deckName: string;
-      modelName: "Basic-e3b45";
+      modelName: string;
       fields: {
-        Front: string;
-        Back: string;
+        Frente: string;
+        Verso: string;
       };
       audio: FlashcardAudioPayload[];
     };
   };
+};
+
+export type ModelTypeResponse = {
+  result: string[] | null;
+  error: string | null;
 };

@@ -27,7 +27,7 @@ export default function FormSection({
     show: false,
     content: "",
   });
-  const ankiConnectService = new AnkiConnectService();
+  const ankitConnectService = new AnkiConnectService();
 
   const handleCardsSubmit = async () => {
     setMessage((prevMessage) => ({ ...prevMessage, show: false }));
@@ -47,8 +47,8 @@ export default function FormSection({
         return;
       }
 
-      ankiConnectService.setDeckName(selectRef.current.value);
-      await ankiConnectService.addCardsToAnki(flashcards);
+      ankitConnectService.setDeckName(selectRef.current.value);
+      await ankitConnectService.addCardsToAnki(flashcards);
       setMessage((prevState) => ({
         ...prevState,
         type: "success",
