@@ -24,7 +24,7 @@ export type FlashcardPayload = {
   };
 };
 
-export type ModelRelatedResponse = {
+export type BasicModelRelatedResponse = {
   result: string[] | null;
   error: string | null;
 };

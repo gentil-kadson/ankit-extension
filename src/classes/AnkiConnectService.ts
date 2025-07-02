@@ -1,7 +1,7 @@
 import type {
   Flashcard,
   FlashcardPayload,
-  ModelRelatedResponse,
+  BasicModelRelatedResponse,
 } from "../types";
 import AnkitTextToSpeechService from "./AnkitTextToSpeechService";
 
@@ -34,6 +34,37 @@ export default class AnkiConnectService {
     });
   }
 
+  async validateModelTemplate(modelName: string, modelFields: string[]) {
+    const payload = {
+      action: "modelTemplates",
+      version: 6,
+      params: {
+        modelName,
+      },
+    };
+
+    const response = await fetch(this.baseUrl, {
+      ...this.baseFetchData,
+      body: JSON.stringify(payload),
+    }).catch((_error) => {
+      throw Error("Conexão com o Anki perdida");
+    });
+
+    const templatesJson = await response.json();
+    const templatesData: any = Object.values(templatesJson.result)[0];
+
+    const validatingData = {
+      Front: `{{${modelFields[0]}}}`,
+      Back: `{{FrontSide}}\n\n<hr id=answer>\n\n{{${modelFields[1]}}}`,
+    };
+
+    if (
+      templatesData.Front !== validatingData.Front &&
+      templatesData.Back !== validatingData.Back
+    )
+      throw Error("Template de cartão básico original não encontrado");
+  }
+
   async getBasicModelFields(modelName: string) {
     const payload = {
       action: "modelFieldNames",
@@ -50,14 +81,13 @@ export default class AnkiConnectService {
       throw Error("Conexão com o Anki perdida.");
     });
 
-    const modelFields: ModelRelatedResponse = await response.json();
+    const modelFields: BasicModelRelatedResponse = await response.json();
     if (!modelFields.result || modelFields.result.length !== 2) {
       throw Error(
-        "Modelo de cartão inválido. Certifique-se de ter o modelo de cartão básico no seu Anki"
+        "Modelo de cartão inválido. Certifique-se de ter o modelo de cartão básico original no seu Anki"
       );
     }
-    this.modelName = modelName;
-    this.modelFields = modelFields.result;
+    return modelFields.result;
   }
 
   async fillModelData() {
@@ -68,11 +98,15 @@ export default class AnkiConnectService {
       throw Error("Conexão com o Anki perdida");
     });
 
-    const noteModels: ModelRelatedResponse = await response.json();
+    const noteModels: BasicModelRelatedResponse = await response.json();
     if (!noteModels.result) {
       throw Error("Parece que não há modelos de cartões no seu Anki");
     }
-    await this.getBasicModelFields(noteModels.result[0]);
+
+    const modelFields = await this.getBasicModelFields(noteModels.result[0]);
+    await this.validateModelTemplate(noteModels.result[0], modelFields);
+    this.modelName = noteModels.result[0];
+    this.modelFields = modelFields;
   }
 
   async generateFlashcardPayload(front: string, back: string) {
