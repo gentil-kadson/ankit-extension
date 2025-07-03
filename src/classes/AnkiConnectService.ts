@@ -59,8 +59,8 @@ export default class AnkiConnectService {
     };
 
     if (
-      templatesData.Front !== validatingData.Front &&
-      templatesData.Back !== validatingData.Back
+      !templatesData.Front.includes(validatingData.Front) &&
+      !templatesData.Back.includes(validatingData.Back)
     )
       throw Error("Template de cartão básico original não encontrado");
   }

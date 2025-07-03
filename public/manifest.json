@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "0.0.0.2",
+  "version": "0.0.0.3",
   "name": "Ankit Extension",
   "description": "Communicates with Ankit website to add cards from user's study sessions to Anki.",
   "action": {
